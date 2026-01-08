@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (never commit)
+data/raw/
+data/processed/
+
+# OS/IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Reports (optional: keep figures tracked later if you want)
+reports/tmp/
