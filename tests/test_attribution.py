@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from src.telemetry.attribution import attribute_corner_losses_v1
+from src.telemetry.attribution import attribute_corner_losses_v2
 
 
 def make_simple_lap(speed_scale=1.0):
@@ -34,11 +34,13 @@ def test_attribution_conservation_nonnegative():
     ref = make_simple_lap(speed_scale=1.0)
     tgt = make_simple_lap(speed_scale=0.98)  # slightly slower everywhere
 
-    attrs = attribute_corner_losses_v1(ref, tgt, distance_step_m=1.0, exit_len_m=100.0)
+    attrs = attribute_corner_losses_v2(ref, tgt, distance_step_m=1.0, exit_len_m=100.0)
     assert len(attrs) >= 1
 
     # losses should be >= 0 in this synthetic scenario
     for a in attrs:
         assert a.loss_total_s >= -1e-6
-        # braking + exit should sum to total (v1 has only these two components)
-        assert abs((a.loss_braking_s + a.loss_exit_s) - a.loss_total_s) < 1e-6
+        # v2: braking + mid-corner + traction should sum to total
+        assert (
+            abs((a.loss_braking_s + a.loss_midcorner_s + a.loss_traction_s) - a.loss_total_s) < 1e-6
+        )

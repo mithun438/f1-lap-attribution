@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
-from src.telemetry.attribution import attribute_corner_losses_v1
+from src.telemetry.attribution import attribute_corner_losses_v2
 
 
 def main() -> None:
@@ -15,10 +15,10 @@ def main() -> None:
     ref = pd.read_parquet(ref_path)
     tgt = pd.read_parquet(tgt_path)
 
-    attrs = attribute_corner_losses_v1(ref, tgt, distance_step_m=1.0, exit_len_m=120.0)
+    attrs = attribute_corner_losses_v2(ref, tgt, distance_step_m=1.0, exit_len_m=120.0)
     df = pd.DataFrame([a.__dict__ for a in attrs])
 
-    out_csv = Path("reports/monza_2023q_attribution_ver_vs_lec.csv")
+    out_csv = Path("reports/monza_2023q_attribution_v2_ver_vs_lec.csv")
     df.to_csv(out_csv, index=False)
 
     print("Wrote:", out_csv)
@@ -27,16 +27,18 @@ def main() -> None:
             [
                 "corner_id",
                 "loss_braking_s",
-                "loss_exit_s",
+                "loss_midcorner_s",
+                "loss_traction_s",
                 "loss_total_s",
             ]
         ]
     )
 
     print("\nTotals:")
-    print("Braking loss total (s):", float(df["loss_braking_s"].sum()))
-    print("Exit loss total (s):   ", float(df["loss_exit_s"].sum()))
-    print("Corner total (s):      ", float(df["loss_total_s"].sum()))
+    print("Braking loss total (s):  ", float(df["loss_braking_s"].sum()))
+    print("Mid-corner loss total(s):", float(df["loss_midcorner_s"].sum()))
+    print("Traction loss total (s): ", float(df["loss_traction_s"].sum()))
+    print("Corner total (s):        ", float(df["loss_total_s"].sum()))
 
 
 if __name__ == "__main__":

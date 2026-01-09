@@ -16,12 +16,15 @@ class CornerAttribution:
     corner_id: int
     brake_start_m: float
     apex_m: float
+    throttle_on_m: float
     exit_end_m: float
     delta_at_brake_start_s: float
     delta_at_apex_s: float
+    delta_at_throttle_on_s: float
     delta_at_exit_s: float
     loss_braking_s: float
-    loss_exit_s: float
+    loss_midcorner_s: float
+    loss_traction_s: float
     loss_total_s: float
 
 
@@ -33,7 +36,7 @@ def _interp_delta(delta_df: pd.DataFrame, dist_m: float) -> float:
     return float(np.interp(dist_m, d, y))
 
 
-def attribute_corner_losses_v1(
+def attribute_corner_losses_v2(
     ref_raw: pd.DataFrame,
     tgt_raw: pd.DataFrame,
     *,
@@ -62,24 +65,29 @@ def attribute_corner_losses_v1(
     for s in segments:
         db = _interp_delta(delta, s.brake_start_m)
         da = _interp_delta(delta, s.apex_m)
+        dt = _interp_delta(delta, s.throttle_on_m)
         dx = _interp_delta(delta, s.exit_end_m)
 
-        loss_brake = da - db
-        loss_exit = dx - da
-        loss_total = dx - db
+        loss_braking_s = da - db
+        loss_midcorner_s = dt - da
+        loss_traction_s = dx - dt
+        loss_total_s = dx - db
 
         out.append(
             CornerAttribution(
                 corner_id=s.corner_id,
                 brake_start_m=s.brake_start_m,
                 apex_m=s.apex_m,
+                throttle_on_m=s.throttle_on_m,
                 exit_end_m=s.exit_end_m,
                 delta_at_brake_start_s=db,
                 delta_at_apex_s=da,
+                delta_at_throttle_on_s=dt,
                 delta_at_exit_s=dx,
-                loss_braking_s=loss_brake,
-                loss_exit_s=loss_exit,
-                loss_total_s=loss_total,
+                loss_braking_s=loss_braking_s,
+                loss_midcorner_s=loss_midcorner_s,
+                loss_traction_s=loss_traction_s,
+                loss_total_s=loss_total_s,
             )
         )
 
