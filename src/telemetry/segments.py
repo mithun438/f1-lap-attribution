@@ -47,21 +47,34 @@ def build_corner_segments(
         i = int(np.searchsorted(d, x, side="left"))
         return int(np.clip(i, 0, n - 1))
 
-    for k, z in enumerate(zones, start=1):
+    # Precompute zone start/end distances in sorted order
+    zone_starts = [float(z.start_m) for z in zones]
+    # zone_ends = [float(z.end_m) for z in zones]
+
+    for i, z in enumerate(zones, start=1):
         s_i = idx_at_dist(z.start_m)
         e_i = idx_at_dist(z.end_m)
 
-        # Search for apex slightly after braking ends as well (some corners have trailing braking)
+        # Search for apex slightly after braking ends as well
         apex_search_end = idx_at_dist(min(z.end_m + 50.0, float(d[-1])))
         if apex_search_end <= s_i:
             apex_search_end = e_i
 
-        # Apex = min speed index in the window
         window = slice(s_i, apex_search_end + 1)
         apex_i_rel = int(np.argmin(v[window]))
         apex_i = s_i + apex_i_rel
 
-        exit_end_m = min(z.end_m + exit_len_m, float(d[-1]))
+        # --- IMPORTANT: cap exit so segments do NOT overlap ---
+        proposed_exit_end = z.end_m + exit_len_m
+
+        if i < len(zones):
+            # next braking start (leave a small buffer so we don’t include next braking onset)
+            next_brake_start = zone_starts[i]  # because i is 1-based index into zones
+            cap = max(z.end_m, next_brake_start - 5.0)
+            exit_end_m = min(proposed_exit_end, cap)
+        else:
+            exit_end_m = min(proposed_exit_end, float(d[-1]))
+
         x_i = idx_at_dist(exit_end_m)
 
         entry_speed = float(v[s_i])
@@ -71,7 +84,7 @@ def build_corner_segments(
         seg_time = float(t[x_i] - t[s_i])
         segments.append(
             CornerSegment(
-                corner_id=k,
+                corner_id=i,
                 brake_start_m=float(d[s_i]),
                 brake_end_m=float(d[e_i]),
                 apex_m=float(d[apex_i]),
