@@ -145,6 +145,26 @@ python src/cli/run_pipeline.py --year 2023 --gp Italy --session Q --ref VER --tg
 - Strict quality gates (ruff, black, pre-commit, pytest)
 - Modular design for future replacement with higher-fidelity models
 
+## Validation & Engineering Guarantees
+
+- Unit-tested core primitives:
+    - distance-based resampling
+    - braking zone detection
+    - segment non-overlap
+    - attribution conservation (sum of phases = segment loss)
+
+- Deterministic results:
+    - fixed distance grid
+    - no stochastic components
+
+- Numerical stability:
+    - tolerances (1e-6) used to avoid floating-point artefacts
+
+- Known limitations:
+    - public telemetry granularity
+    - heuristic phase boundaries
+    - interpolation effects on absolute lap delta
+
 ## Future extensions
 - Full-lap accounting
 - Curvature-based corner detection
