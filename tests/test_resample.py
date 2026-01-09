@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import pytest
 from src.telemetry.resample import resample_by_distance
 
 
@@ -47,7 +46,8 @@ def test_resample_monotonic_and_schema():
 
 
 def test_missing_columns_raises():
+    # Only distance/time/speed are required. Optional channels should default.
     df = make_dummy_df().drop(columns=["DRS"])
-    with pytest.raises(ValueError) as e:
-        resample_by_distance(df)
-    assert "Missing columns" in str(e.value)
+    out = resample_by_distance(df, distance_step_m=1.0)
+    assert "drs" in out.columns
+    assert (out["drs"] == 0).all()

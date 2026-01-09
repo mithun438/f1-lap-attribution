@@ -7,8 +7,18 @@ import numpy as np
 import pandas as pd
 
 
-def main() -> None:
-    in_csv = Path("reports/monza_2023q_attribution_v2_ver_vs_lec.csv")
+def run_attribution_bar_plot(
+    *,
+    out_tag: str = "run",
+    in_dir: Path = Path("reports"),
+    out_dir: Path = Path("reports"),
+) -> Path:
+    """
+    Create stacked bars per corner for braking/mid-corner/traction losses.
+    Reads:  {in_dir}/{out_tag}_attribution_v2.csv
+    Writes: {out_dir}/{out_tag}_attribution_stacked_bars.png
+    """
+    in_csv = in_dir / f"{out_tag}_attribution_v2.csv"
     if not in_csv.exists():
         raise FileNotFoundError(f"Missing expected file: {in_csv}. Run attribution_table.py first.")
 
@@ -27,9 +37,8 @@ def main() -> None:
 
     x = np.arange(len(corners))
 
-    out_dir = Path("reports")
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_png = out_dir / "attribution_stacked_bars.png"
+    out_png = out_dir / f"{out_tag}_attribution_stacked_bars.png"
 
     plt.figure()
     plt.bar(x, braking, label="Braking")
@@ -38,12 +47,23 @@ def main() -> None:
     plt.xticks(x, corners)
     plt.ylabel("ΔTime contribution (s)")
     plt.title("Corner Loss Breakdown (Target − Reference)")
-
     plt.axhline(0.0, linewidth=0.8)
     plt.legend()
     plt.tight_layout()
     plt.savefig(out_png, dpi=200)
+
     print("Wrote:", out_png)
+    return out_png
+
+
+def main() -> None:
+    # Backward-compatible behavior for your Monza example:
+    out = run_attribution_bar_plot(out_tag="monza_2023q_ver_vs_lec")
+
+    # Preserve legacy filename for README stability
+    legacy = Path("reports/attribution_stacked_bars.png")
+    if out != legacy:
+        legacy.write_bytes(out.read_bytes())
 
 
 if __name__ == "__main__":
