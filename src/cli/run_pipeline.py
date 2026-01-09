@@ -107,7 +107,16 @@ def main() -> None:
             tgt_fuel_kg=args.tgt_fuel_kg,
             coeff_s_per_kg=args.fuel_coeff,
         )
-        print(f"Fuel-corrected Δlap time (s): {corrected}")
+        fuel_delta = args.tgt_fuel_kg - args.ref_fuel_kg
+        fuel_adjustment = fuel_delta * args.fuel_coeff
+
+        print("Fuel correction:")
+        print(f"  ref_fuel_kg:             {args.ref_fuel_kg}")
+        print(f"  tgt_fuel_kg:             {args.tgt_fuel_kg}")
+        print(f"  fuel_delta_kg (tgt-ref): {fuel_delta:+.1f}")
+        print(f"  fuel_adjustment_s:       {fuel_adjustment:+.4f}")
+        print(f"Fuel-corrected Δlap time (s): {corrected:+.6f}")
+
         summary_lines.append(f"ref_fuel_kg: {args.ref_fuel_kg}")
         summary_lines.append(f"tgt_fuel_kg: {args.tgt_fuel_kg}")
         summary_lines.append(f"fuel_coeff_s_per_kg: {args.fuel_coeff}")
