@@ -14,6 +14,7 @@ class CornerSegment:
     brake_start_m: float
     brake_end_m: float
     apex_m: float
+    throttle_on_m: float
     exit_end_m: float
     entry_speed_kph: float
     min_speed_kph: float
@@ -29,6 +30,9 @@ def build_corner_segments(
     distance_col: str = "distance_m",
     time_col: str = "time_s",
     speed_col: str = "speed_kph",
+    throttle_col: str = "throttle_pct",
+    throttle_on_threshold: float = 20.0,
+    throttle_on_hold_m: float = 15.0,
 ) -> list[CornerSegment]:
     """
     v1 heuristic:
@@ -76,6 +80,29 @@ def build_corner_segments(
 
         x_i = idx_at_dist(exit_end_m)
 
+        if throttle_col not in lap.columns:
+            raise ValueError(f"Missing required column '{throttle_col}' for throttle-on detection")
+
+        thr = lap[throttle_col].to_numpy(dtype=float)
+
+        # --- throttle-on detection (after apex) ---
+        hold_pts = int(max(1, round(throttle_on_hold_m)))  # ~meters since step ≈ 1m
+        throttle_on_i = apex_i
+
+        found = False
+        for j in range(apex_i, x_i + 1):
+            j2 = min(x_i, j + hold_pts)
+            if np.all(thr[j:j2] >= throttle_on_threshold):
+                throttle_on_i = j
+                found = True
+                break
+
+        if not found:
+            # conservative fallback: treat apex as throttle-on
+            throttle_on_i = apex_i
+
+        throttle_on_m = float(d[throttle_on_i])
+
         entry_speed = float(v[s_i])
         min_speed = float(v[apex_i])
         exit_speed = float(v[x_i])
@@ -87,6 +114,7 @@ def build_corner_segments(
                 brake_start_m=float(d[s_i]),
                 brake_end_m=float(d[e_i]),
                 apex_m=float(d[apex_i]),
+                throttle_on_m=throttle_on_m,
                 exit_end_m=float(d[x_i]),
                 entry_speed_kph=entry_speed,
                 min_speed_kph=min_speed,
