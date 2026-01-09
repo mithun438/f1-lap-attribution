@@ -9,6 +9,7 @@ from src.reports.plot_attribution_bars import run_attribution_bar_plot
 from src.reports.plot_delta_time import run_delta_plot
 from src.reports.plot_delta_with_segments import run_delta_with_segments_plot
 from src.reports.segments_table import run_segments_report
+from src.telemetry.fuel import normalize_delta_for_fuel
 
 
 def parse_args() -> argparse.Namespace:
@@ -29,6 +30,18 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--exit-len-m", type=float, default=120.0, help="Exit window length in meters")
     ap.add_argument(
         "--out-tag", type=str, default="run", help="Prefix tag for report/plot filenames"
+    )
+    ap.add_argument(
+        "--ref-fuel-kg", type=float, default=None, help="Reference fuel mass in kg (optional)"
+    )
+    ap.add_argument(
+        "--tgt-fuel-kg", type=float, default=None, help="Target fuel mass in kg (optional)"
+    )
+    ap.add_argument(
+        "--fuel-coeff",
+        type=float,
+        default=0.03,
+        help="Fuel time coefficient in s/kg (default: 0.03)",
     )
 
     return ap.parse_args()
@@ -52,7 +65,12 @@ def main() -> None:
     )
 
     # 2) Generate plots and tables
-    run_delta_plot(ref_path, tgt_path, out_tag=args.out_tag, distance_step_m=args.distance_step_m)
+    final_delta_s = run_delta_plot(
+        ref_path, tgt_path, out_tag=args.out_tag, distance_step_m=args.distance_step_m
+    )
+    if final_delta_s is None:
+        raise RuntimeError("run_delta_plot returned None; expected float final delta")
+
     run_delta_with_segments_plot(
         ref_path,
         tgt_path,
@@ -74,6 +92,34 @@ def main() -> None:
         exit_len_m=args.exit_len_m,
     )
     run_attribution_bar_plot(out_tag=args.out_tag)
+
+    # Optional: fuel correction on final lap delta (heuristic).
+    # Note: This corrects only the *net* lap delta, not per-corner phase losses.
+    # (Per-corner fuel scaling can be added later if desired.)
+    summary_lines = []
+    summary_lines.append(f"out_tag: {args.out_tag}")
+    summary_lines.append(f"raw_delta_lap_time_s: {final_delta_s:.6f}")
+
+    if args.ref_fuel_kg is not None and args.tgt_fuel_kg is not None:
+        corrected = normalize_delta_for_fuel(
+            final_delta_s,
+            ref_fuel_kg=args.ref_fuel_kg,
+            tgt_fuel_kg=args.tgt_fuel_kg,
+            coeff_s_per_kg=args.fuel_coeff,
+        )
+        print(f"Fuel-corrected Δlap time (s): {corrected}")
+        summary_lines.append(f"ref_fuel_kg: {args.ref_fuel_kg}")
+        summary_lines.append(f"tgt_fuel_kg: {args.tgt_fuel_kg}")
+        summary_lines.append(f"fuel_coeff_s_per_kg: {args.fuel_coeff}")
+        summary_lines.append(f"fuel_corrected_delta_lap_time_s: {corrected:.6f}")
+    else:
+        summary_lines.append("fuel_correction: disabled (provide --ref-fuel-kg and --tgt-fuel-kg)")
+
+    reports_dir = Path("reports")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    summary_path = reports_dir / f"{args.out_tag}_summary.txt"
+    summary_path.write_text("\n".join(summary_lines) + "\n", encoding="utf-8")
+    print(f"Wrote: {summary_path}")
 
     print("\nDone.")
     print("Reports:   ./reports")

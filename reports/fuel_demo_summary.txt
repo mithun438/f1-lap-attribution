@@ -1,0 +1,6 @@
+out_tag: fuel_demo
+raw_delta_lap_time_s: 0.132233
+ref_fuel_kg: 12.0
+tgt_fuel_kg: 18.0
+fuel_coeff_s_per_kg: 0.03
+fuel_corrected_delta_lap_time_s: -0.047767
