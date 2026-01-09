@@ -49,7 +49,6 @@ def build_corner_segments(
 
     # Precompute zone start/end distances in sorted order
     zone_starts = [float(z.start_m) for z in zones]
-    # zone_ends = [float(z.end_m) for z in zones]
 
     for i, z in enumerate(zones, start=1):
         s_i = idx_at_dist(z.start_m)
