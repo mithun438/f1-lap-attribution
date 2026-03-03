@@ -22,5 +22,6 @@ data/processed/
 .vscode/
 .idea/
 
-# Reports (optional: keep figures tracked later if you want)
-reports/tmp/
+# Generated artifacts
+reports/
+data/processed/
