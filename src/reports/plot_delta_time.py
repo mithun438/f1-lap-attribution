@@ -5,6 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 from src.telemetry.delta import compute_delta_on_distance_grid
+from src.telemetry.fuel_curve import apply_fuel_correction_ramp
 from src.telemetry.resample import resample_by_distance
 
 
@@ -15,6 +16,7 @@ def run_delta_plot(
     out_tag: str = "run",
     distance_step_m: float = 1.0,
     out_dir: Path = Path("reports"),
+    applied_correction_s: float | None = None,
 ) -> float:
     """
     Compute and plot lap delta time vs distance.
@@ -46,6 +48,22 @@ def run_delta_plot(
     plt.savefig(out_path, dpi=150)
     plt.close()
 
+    # Optional: write a second plot with a distance-ramped fuel correction.
+    if applied_correction_s is not None:
+        delta_fc = apply_fuel_correction_ramp(delta, applied_correction_s=applied_correction_s)
+
+        plt.figure()
+        plt.plot(delta_fc["distance_m"], delta_fc["delta_time_s"], label="raw")
+        plt.plot(delta_fc["distance_m"], delta_fc["delta_time_s_corrected"], label="fuel-corrected")
+        plt.xlabel("Distance (m)")
+        plt.ylabel("Δtime (s) [tgt - ref]")
+        plt.title(f"Δtime vs distance (fuel-corrected ramp) | {out_tag}")
+        plt.legend()
+
+        out_path_fc = out_dir / f"{out_tag}_delta_time_vs_distance_fuel_corrected.png"
+        plt.savefig(out_path_fc, dpi=200, bbox_inches="tight")
+        print(f"Wrote: {out_path_fc}")
+
     print(f"Wrote: {out_path}")
     print(f"Final Δlap time (s): {final_delta_s}")
 
@@ -59,12 +77,21 @@ def main() -> None:
 
     # Backward-compatible default output name (matches earlier file)
     # If you want it tagged, call run_delta_plot from CLI.
-    out = run_delta_plot(ref_path, tgt_path, out_tag="delta_time", distance_step_m=1.0)
+    # run_delta_plot now returns the final lap delta (float), not the
+    # path of the generated plot.
+    final_delta = run_delta_plot(ref_path, tgt_path, out_tag="delta_time", distance_step_m=1.0)
 
-    # Preserve your legacy filename for README stability
+    # Preserve your legacy filename for README stability.  The generated
+    # plot is written inside `run_delta_plot` using the same logic, so
+    # reconstruct the path here rather than trying to reuse the return
+    # value.
     legacy = Path("reports/delta_time_vs_distance.png")
-    if out != legacy:
-        legacy.write_bytes(out.read_bytes())
+    new_plot = Path("reports") / "delta_time_delta_time_vs_distance.png"
+    if new_plot != legacy:
+        legacy.write_bytes(new_plot.read_bytes())
+
+    # optional logging of the returned delta
+    print(f"run_delta_plot returned final delta: {final_delta}")
 
 
 if __name__ == "__main__":

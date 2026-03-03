@@ -65,8 +65,19 @@ def main() -> None:
     )
 
     # 2) Generate plots and tables
+    applied_correction_s = None
+
+    if args.ref_fuel_kg is not None and args.tgt_fuel_kg is not None:
+        fuel_delta = args.tgt_fuel_kg - args.ref_fuel_kg
+        fuel_penalty_delta = fuel_delta * args.fuel_coeff
+        applied_correction_s = -fuel_penalty_delta
+
     final_delta_s = run_delta_plot(
-        ref_path, tgt_path, out_tag=args.out_tag, distance_step_m=args.distance_step_m
+        ref_path,
+        tgt_path,
+        out_tag=args.out_tag,
+        distance_step_m=args.distance_step_m,
+        applied_correction_s=applied_correction_s,
     )
     if final_delta_s is None:
         raise RuntimeError("run_delta_plot returned None; expected float final delta")
@@ -108,13 +119,15 @@ def main() -> None:
             coeff_s_per_kg=args.fuel_coeff,
         )
         fuel_delta = args.tgt_fuel_kg - args.ref_fuel_kg
-        fuel_adjustment = fuel_delta * args.fuel_coeff
+        fuel_penalty_delta = fuel_delta * args.fuel_coeff
+        applied_correction = -fuel_penalty_delta  # what we apply to raw delta
 
         print("Fuel correction:")
         print(f"  ref_fuel_kg:             {args.ref_fuel_kg}")
         print(f"  tgt_fuel_kg:             {args.tgt_fuel_kg}")
         print(f"  fuel_delta_kg (tgt-ref): {fuel_delta:+.1f}")
-        print(f"  fuel_adjustment_s:       {fuel_adjustment:+.4f}")
+        print(f"  fuel_penalty_delta_s (tgt-ref): {fuel_penalty_delta:+.4f}")
+        print(f"  applied_correction_s (add to raw): {applied_correction:+.4f}")
         print(f"Fuel-corrected Δlap time (s): {corrected:+.6f}")
 
         summary_lines.append(f"ref_fuel_kg: {args.ref_fuel_kg}")
