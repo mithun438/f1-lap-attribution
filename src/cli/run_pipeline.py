@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from src.config import load_pipeline_config
 from src.data.fastf1_utils import pull_fastest_lap_pair
 from src.reports.attribution_table import run_attribution_report
 from src.reports.plot_attribution_bars import run_attribution_bar_plot
@@ -43,12 +44,29 @@ def parse_args() -> argparse.Namespace:
         default=0.03,
         help="Fuel time coefficient in s/kg (default: 0.03)",
     )
+    ap.add_argument(
+        "--config",
+        type=Path,
+        default=Path("config/default.yaml"),
+        help="Path to YAML config (defaults to config/default.yaml)",
+    )
 
     return ap.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+
+    cfg = load_pipeline_config(args.config)
+
+    distance_step_m = (
+        args.distance_step_m if args.distance_step_m is not None else cfg.distance_step_m
+    )
+    fuel_coeff = args.fuel_coeff if args.fuel_coeff is not None else cfg.fuel_coeff
+    out_dir = Path(args.out_dir) if getattr(args, "out_dir", None) is not None else cfg.out_dir
+    write_plots = (
+        args.write_plots if getattr(args, "write_plots", None) is not None else cfg.write_plots
+    )
 
     processed = Path("data/processed")
     processed.mkdir(parents=True, exist_ok=True)
@@ -69,15 +87,17 @@ def main() -> None:
 
     if args.ref_fuel_kg is not None and args.tgt_fuel_kg is not None:
         fuel_delta = args.tgt_fuel_kg - args.ref_fuel_kg
-        fuel_penalty_delta = fuel_delta * args.fuel_coeff
+        fuel_penalty_delta = fuel_delta * fuel_coeff
         applied_correction_s = -fuel_penalty_delta
 
     final_delta_s = run_delta_plot(
         ref_path,
         tgt_path,
         out_tag=args.out_tag,
-        distance_step_m=args.distance_step_m,
+        distance_step_m=distance_step_m,
+        out_dir=out_dir,
         applied_correction_s=applied_correction_s,
+        write_plots=write_plots,
     )
     if final_delta_s is None:
         raise RuntimeError("run_delta_plot returned None; expected float final delta")
@@ -86,20 +106,20 @@ def main() -> None:
         ref_path,
         tgt_path,
         out_tag=args.out_tag,
-        distance_step_m=args.distance_step_m,
+        distance_step_m=distance_step_m,
         exit_len_m=args.exit_len_m,
     )
     run_segments_report(
         ref_path,
         out_tag=args.out_tag,
         exit_len_m=args.exit_len_m,
-        distance_step_m=args.distance_step_m,
+        distance_step_m=distance_step_m,
     )
     run_attribution_report(
         ref_path,
         tgt_path,
         out_tag=args.out_tag,
-        distance_step_m=args.distance_step_m,
+        distance_step_m=distance_step_m,
         exit_len_m=args.exit_len_m,
     )
     run_attribution_bar_plot(out_tag=args.out_tag)
@@ -116,7 +136,7 @@ def main() -> None:
             final_delta_s,
             ref_fuel_kg=args.ref_fuel_kg,
             tgt_fuel_kg=args.tgt_fuel_kg,
-            coeff_s_per_kg=args.fuel_coeff,
+            coeff_s_per_kg=fuel_coeff,
         )
         fuel_delta = args.tgt_fuel_kg - args.ref_fuel_kg
         fuel_penalty_delta = fuel_delta * args.fuel_coeff
@@ -132,7 +152,7 @@ def main() -> None:
 
         summary_lines.append(f"ref_fuel_kg: {args.ref_fuel_kg}")
         summary_lines.append(f"tgt_fuel_kg: {args.tgt_fuel_kg}")
-        summary_lines.append(f"fuel_coeff_s_per_kg: {args.fuel_coeff}")
+        summary_lines.append(f"fuel_coeff_s_per_kg: {fuel_coeff}")
         summary_lines.append(f"fuel_corrected_delta_lap_time_s: {corrected:.6f}")
     else:
         summary_lines.append("fuel_correction: disabled (provide --ref-fuel-kg and --tgt-fuel-kg)")

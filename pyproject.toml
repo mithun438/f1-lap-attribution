@@ -24,7 +24,7 @@ version = "0.1.0"
 description = "Telemetry delta and attribution tooling (FastF1-based)"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["PyYAML>=6.0"]
 
 [tool.setuptools]
 package-dir = {"" = "."}
