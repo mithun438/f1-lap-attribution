@@ -14,15 +14,17 @@ ignore = ["E501"]
 [tool.ruff.format]
 quote-style = "double"
 
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "f1-lap-attribution"
 version = "0.1.0"
-requires-python = ">=3.10"
+description = "Telemetry delta and attribution tooling (FastF1-based)"
+readme = "README.md"
+requires-python = ">=3.11"
 dependencies = []
-
-[build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 package-dir = {"" = "."}
