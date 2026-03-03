@@ -4,7 +4,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from src.telemetry.delta import compute_delta_on_distance_grid
+from src.telemetry.delta_trace import compute_delta_trace_from_traces
 from src.telemetry.fuel_curve import apply_fuel_correction_ramp
 from src.telemetry.resample import resample_by_distance
 
@@ -30,7 +30,24 @@ def run_delta_plot(
     ref = resample_by_distance(ref_raw, distance_step_m=distance_step_m)
     tgt = resample_by_distance(tgt_raw, distance_step_m=distance_step_m)
 
-    delta = compute_delta_on_distance_grid(ref, tgt)
+    # compute layer expects traces with ['distance_m', 'time_s']
+    # Your resampled frames likely have lap_time_s, so normalize.
+    ref2 = ref.rename(columns={"lap_time_s": "time_s"}) if "time_s" not in ref.columns else ref
+    tgt2 = tgt.rename(columns={"lap_time_s": "time_s"}) if "time_s" not in tgt.columns else tgt
+
+    required = {"distance_m", "time_s"}
+    missing_ref = sorted(required - set(ref2.columns))
+    missing_tgt = sorted(required - set(tgt2.columns))
+    if missing_ref:
+        raise ValueError(f"ref trace missing columns: {missing_ref}")
+    if missing_tgt:
+        raise ValueError(f"tgt trace missing columns: {missing_tgt}")
+
+    delta = compute_delta_trace_from_traces(
+        ref2[["distance_m", "time_s"]],
+        tgt2[["distance_m", "time_s"]],
+        distance_step_m=distance_step_m,
+    )
 
     final_delta_s = float(delta["delta_time_s"].iloc[-1])
 
