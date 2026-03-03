@@ -73,34 +73,3 @@ def run_delta_plot(
     print(f"Final Δlap time (s): {final_delta_s}")
 
     return final_delta_s
-
-
-def main() -> None:
-    processed = Path("data/processed")
-    ref_path = processed / "sample_2023_Monza_Q_VER_fastest.parquet"
-    tgt_path = processed / "sample_2023_Monza_Q_LEC_fastest.parquet"
-
-    # Backward-compatible default output name (matches earlier file)
-    # If you want it tagged, call run_delta_plot from CLI.
-    # run_delta_plot now returns the final lap delta (float), not the
-    # path of the generated plot.
-    final_delta = run_delta_plot(ref_path, tgt_path, out_tag="delta_time", distance_step_m=1.0)
-
-    # Preserve your legacy filename for README stability.  The generated
-    # plot is written inside `run_delta_plot` using the same logic, so
-    # reconstruct the path here rather than trying to reuse the return
-    # value.
-    legacy = Path("reports/delta_time_vs_distance.png")
-    new_plot = Path("reports") / "delta_time_delta_time_vs_distance.png"
-    if new_plot != legacy:
-        legacy.write_bytes(new_plot.read_bytes())
-
-    # optional logging of the returned delta
-    print(f"run_delta_plot returned final delta: {final_delta}")
-
-
-if __name__ == "__main__":
-    main()
-
-
-# NOTE: run_delta_plot should return final_delta_s as float.
