@@ -49,7 +49,7 @@ def run_delta_plot(
     if write_plots:
         plt.savefig(out_path, dpi=200, bbox_inches="tight")
         print(f"Wrote: {out_path}")
-        plt.close()
+    plt.close()
 
     # Optional: write a second plot with a distance-ramped fuel correction.
     if applied_correction_s is not None:
@@ -68,8 +68,5 @@ def run_delta_plot(
             plt.savefig(out_path_fc, dpi=200, bbox_inches="tight")
             print(f"Wrote: {out_path_fc}")
         plt.close()
-
-    print(f"Wrote: {out_path}")
-    print(f"Final Δlap time (s): {final_delta_s}")
 
     return final_delta_s
