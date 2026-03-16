@@ -7,6 +7,7 @@ import pandas as pd
 from src.config import load_pipeline_config
 from src.data.fastf1_utils import pull_fastest_lap_pair
 from src.reports.export_comparison_table import export_comparison_table
+from src.reports.html_report import write_html_report
 from src.reports.plot_delta_time import run_delta_plot
 
 
@@ -154,6 +155,16 @@ def run_one(
         distance_step_m=distance_step_m,
     )
 
+    report_path = write_html_report(
+        out_dir=out_dir,
+        out_tag=out_tag,
+        delta_s=final_delta_s,
+        ref=ref,
+        tgt=tgt,
+        ref_lap_s=ref_lap_s,
+        tgt_lap_s=tgt_lap_s,
+    )
+
     fuel_corrected_delta_s = (
         float(final_delta_s + applied_correction_s) if applied_correction_s is not None else None
     )
@@ -177,6 +188,7 @@ def run_one(
             float(applied_correction_s) if applied_correction_s is not None else None
         ),
         "comparison_table_csv": str(comparison_table_path),
+        "html_report": str(report_path),
     }
 
 
