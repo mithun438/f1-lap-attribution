@@ -3,8 +3,10 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+import pandas as pd
 from src.config import load_pipeline_config
 from src.data.fastf1_utils import pull_fastest_lap_pair
+from src.reports.export_comparison_table import export_comparison_table
 from src.reports.plot_delta_time import run_delta_plot
 
 
@@ -45,8 +47,48 @@ def parse_args() -> argparse.Namespace:
         default=Path("config/default.yaml"),
         help="Path to YAML config (defaults to config/default.yaml)",
     )
+    ap.add_argument(
+        "--out-dir",
+        type=Path,
+        default=None,
+        help="Override output directory (defaults to config value)",
+    )
+    ap.add_argument(
+        "--write-plots",
+        dest="write_plots",
+        action="store_true",
+        default=None,
+        help="Force plot writing on",
+    )
+    ap.add_argument(
+        "--no-plots",
+        dest="write_plots",
+        action="store_false",
+        help="Disable plot writing",
+    )
 
     return ap.parse_args()
+
+
+def _extract_lap_time_seconds(path: Path) -> float | None:
+    """
+    Best-effort extraction of lap time from a parquet telemetry trace.
+
+    Expected preference:
+      - 'lap_time_s' column
+      - 'time_s' column
+
+    Returns the final value in seconds, or None if unavailable.
+    """
+    df = pd.read_parquet(path)
+
+    if "lap_time_s" in df.columns and len(df) > 0:
+        return float(df["lap_time_s"].iloc[-1])
+
+    if "time_s" in df.columns and len(df) > 0:
+        return float(df["time_s"].iloc[-1])
+
+    return None
 
 
 def run_one(
@@ -84,12 +126,15 @@ def run_one(
         cache_dir=cache_dir,
     )
 
+    ref_lap_s = _extract_lap_time_seconds(ref_path)
+    tgt_lap_s = _extract_lap_time_seconds(tgt_path)
+
     applied_correction_s = None
-    fuel_penalty_delta = None
+    fuel_penalty_delta_s = None
     if ref_fuel_kg is not None and tgt_fuel_kg is not None:
         fuel_delta = tgt_fuel_kg - ref_fuel_kg
-        fuel_penalty_delta = fuel_delta * fuel_coeff
-        applied_correction_s = -fuel_penalty_delta
+        fuel_penalty_delta_s = fuel_delta * fuel_coeff
+        applied_correction_s = -fuel_penalty_delta_s
 
     final_delta_s = run_delta_plot(
         ref_path,
@@ -101,7 +146,17 @@ def run_one(
         write_plots=write_plots,
     )
 
-    # keep your existing segments/attribution calls unchanged but use out_dir/write_plots as needed
+    comparison_table_path = export_comparison_table(
+        ref_path,
+        tgt_path,
+        out_dir=out_dir,
+        out_tag=out_tag,
+        distance_step_m=distance_step_m,
+    )
+
+    fuel_corrected_delta_s = (
+        float(final_delta_s + applied_correction_s) if applied_correction_s is not None else None
+    )
 
     return {
         "year": year,
@@ -109,14 +164,19 @@ def run_one(
         "session": session,
         "ref": ref,
         "tgt": tgt,
+        "delta_lap_time_s": float(final_delta_s),
+        "ref_lap_time_s": ref_lap_s,
+        "tgt_lap_time_s": tgt_lap_s,
+        "fuel_corrected_delta_s": fuel_corrected_delta_s,
         "out_tag": out_tag,
         "final_delta_s": float(final_delta_s),
         "fuel_penalty_delta_s": (
-            float(fuel_penalty_delta) if fuel_penalty_delta is not None else None
+            float(fuel_penalty_delta_s) if fuel_penalty_delta_s is not None else None
         ),
         "applied_correction_s": (
             float(applied_correction_s) if applied_correction_s is not None else None
         ),
+        "comparison_table_csv": str(comparison_table_path),
     }
 
 
@@ -135,7 +195,11 @@ def main() -> None:
         tgt_fuel_kg=args.tgt_fuel_kg,
         distance_step_m=args.distance_step_m,
         fuel_coeff=args.fuel_coeff,
-        out_dir=Path(args.out_dir) if args.out_dir is not None else None,
+        out_dir=args.out_dir,
         write_plots=args.write_plots,
     )
     print(f"Final Δlap time (s): {result['final_delta_s']}")
+
+
+if __name__ == "__main__":
+    main()

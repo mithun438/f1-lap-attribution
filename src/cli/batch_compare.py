@@ -98,10 +98,37 @@ def main() -> None:
                 done += 1
                 print(f"[{done}/{len(futs)}] done")
 
-    df = pd.DataFrame(rows).sort_values(["ref", "tgt"])
+    df = pd.DataFrame(rows)
+
+    preferred_cols = [
+        "ref",
+        "tgt",
+        "ref_lap_time_s",
+        "tgt_lap_time_s",
+        "delta_lap_time_s",
+        "fuel_corrected_delta_s",
+        "fuel_penalty_delta_s",
+        "year",
+        "gp",
+        "session",
+        "out_tag",
+    ]
+
+    existing_cols = [c for c in preferred_cols if c in df.columns]
+    remaining_cols = [c for c in df.columns if c not in existing_cols]
+    df = df[existing_cols + remaining_cols]
+
+    if "delta_lap_time_s" in df.columns:
+        df["abs_delta_lap_time_s"] = df["delta_lap_time_s"].abs()
+
     out_csv = final_out_dir / "batch_summary.csv"
-    df.to_csv(out_csv, index=False)
+    df.sort_values(["ref", "tgt"]).to_csv(out_csv, index=False)
     print(f"Wrote: {out_csv}")
+
+    if "abs_delta_lap_time_s" in df.columns:
+        out_csv_ranked = final_out_dir / "batch_summary_ranked.csv"
+        df.sort_values("abs_delta_lap_time_s", ascending=False).to_csv(out_csv_ranked, index=False)
+        print(f"Wrote: {out_csv_ranked}")
 
 
 if __name__ == "__main__":
