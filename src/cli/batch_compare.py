@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 from src.cli.run_pipeline import run_one
+from src.reports.html_index import write_batch_index
 
 
 def _pairs(drivers: list[str]) -> list[tuple[str, str]]:
@@ -113,7 +114,6 @@ def main() -> None:
         "session",
         "out_tag",
     ]
-
     existing_cols = [c for c in preferred_cols if c in df.columns]
     remaining_cols = [c for c in df.columns if c not in existing_cols]
     df = df[existing_cols + remaining_cols]
@@ -125,10 +125,17 @@ def main() -> None:
     df.sort_values(["ref", "tgt"]).to_csv(out_csv, index=False)
     print(f"Wrote: {out_csv}")
 
+    ranked_csv = None
     if "abs_delta_lap_time_s" in df.columns:
-        out_csv_ranked = final_out_dir / "batch_summary_ranked.csv"
-        df.sort_values("abs_delta_lap_time_s", ascending=False).to_csv(out_csv_ranked, index=False)
-        print(f"Wrote: {out_csv_ranked}")
+        ranked_csv = final_out_dir / "batch_summary_ranked.csv"
+        df.sort_values("abs_delta_lap_time_s", ascending=False).to_csv(ranked_csv, index=False)
+        print(f"Wrote: {ranked_csv}")
+
+    write_batch_index(
+        out_dir=final_out_dir,
+        summary_csv=out_csv,
+        ranked_csv=ranked_csv,
+    )
 
 
 if __name__ == "__main__":
