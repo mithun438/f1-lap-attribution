@@ -64,6 +64,7 @@ def run_one(
     fuel_coeff: float | None = None,
     out_dir: Path | None = None,
     write_plots: bool | None = None,
+    cache_dir: Path | None = None,
 ) -> dict:
     cfg = load_pipeline_config(config_path)
 
@@ -80,6 +81,7 @@ def run_one(
         tgt_driver=tgt,
         out_dir=out_dir,
         out_tag=out_tag,
+        cache_dir=cache_dir,
     )
 
     applied_correction_s = None
