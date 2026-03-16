@@ -165,13 +165,12 @@ python src/cli/run_pipeline.py --year 2023 --gp Italy --session Q --ref VER --tg
     - heuristic phase boundaries
     - interpolation effects on absolute lap delta
 
-## Future extensions
-- Full-lap accounting
-- Curvature-based corner detection
-- Longitudinal acceleration braking detection
-- Improved throttle-on detection
-- Multi-lap statistics
-- Cross-driver and cross-track analysis
+## Dashboard
+
+A lightweight Streamlit viewer is included for browsing generated runs:
+``` bash
+    streamlit run dashboard.py
+```
 
 ## Disclaimer
 - This project uses public telemetry and simplified heuristics.
