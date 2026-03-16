@@ -176,4 +176,3 @@ python src/cli/run_pipeline.py --year 2023 --gp Italy --session Q --ref VER --tg
 ## Disclaimer
 - This project uses public telemetry and simplified heuristics.
 - It is intended as a technical demonstration, not a substitute for internal F1 tools or proprietary data.
-
