@@ -40,6 +40,7 @@ def main() -> None:
     run_dir = Path("reports") / f"{args.year}_{safe_gp}_{args.session}"
     final_out_dir = args.out_dir if args.out_dir is not None else run_dir
     final_out_dir.mkdir(parents=True, exist_ok=True)
+
     drivers = [d.strip() for d in args.drivers.split(",") if d.strip()]
     pairs = _pairs(drivers)
 
@@ -64,12 +65,12 @@ def main() -> None:
                     write_plots=args.write_plots,
                 )
             )
-
     else:
         with ProcessPoolExecutor(max_workers=args.jobs) as ex:
             futs = []
             cache_root = final_out_dir / "_cache"
             cache_root.mkdir(parents=True, exist_ok=True)
+
             for ref, tgt in pairs:
                 out_tag = f"batch_{ref}_vs_{tgt}"
                 pair_cache = cache_root / f"{ref}_vs_{tgt}"
@@ -90,6 +91,7 @@ def main() -> None:
                         cache_dir=pair_cache,
                     )
                 )
+
             done = 0
             for f in as_completed(futs):
                 rows.append(f.result())
@@ -97,8 +99,6 @@ def main() -> None:
                 print(f"[{done}/{len(futs)}] done")
 
     df = pd.DataFrame(rows).sort_values(["ref", "tgt"])
-    final_out_dir = args.out_dir if args.out_dir is not None else Path("reports")
-    final_out_dir.mkdir(parents=True, exist_ok=True)
     out_csv = final_out_dir / "batch_summary.csv"
     df.to_csv(out_csv, index=False)
     print(f"Wrote: {out_csv}")
