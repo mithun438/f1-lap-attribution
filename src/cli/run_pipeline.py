@@ -155,6 +155,10 @@ def run_one(
         distance_step_m=distance_step_m,
     )
 
+    fuel_corrected_delta_s = (
+        float(final_delta_s + applied_correction_s) if applied_correction_s is not None else None
+    )
+
     report_path = write_html_report(
         out_dir=out_dir,
         out_tag=out_tag,
@@ -163,10 +167,7 @@ def run_one(
         tgt=tgt,
         ref_lap_s=ref_lap_s,
         tgt_lap_s=tgt_lap_s,
-    )
-
-    fuel_corrected_delta_s = (
-        float(final_delta_s + applied_correction_s) if applied_correction_s is not None else None
+        fuel_corrected_delta_s=fuel_corrected_delta_s,
     )
 
     return {
