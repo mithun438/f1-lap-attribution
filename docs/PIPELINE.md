@@ -29,7 +29,7 @@ Typical outputs:
 
 ## 2. Batch comparison
 
-Example: 
+Example:
 
 ```bash
 python src/cli/batch_compare.py --year 2023 --gp Italy --session Q --drivers VER,LEC,SAI --jobs 2
@@ -50,7 +50,7 @@ Typical outputs:
 
 ## 3. No-plots mode
 
-Example: 
+Example:
 
 ```bash
 python src/cli/batch_compare.py --year 2023 --gp Italy --session Q --drivers VER,LEC,SAI --jobs 2 --no-plots
@@ -66,13 +66,13 @@ Useful for:
 
 ## 4. Config driven execution
 
-Example: 
+Example:
 
 ```bash
 python src/cli/run_from_config.py config/run_italy_q.yaml
 ```
 
-Example config: 
+Example config:
 
 ```bash
 year: 2023
@@ -95,7 +95,7 @@ This enables reproducible run definitions.
 
 ## 5. Multi-config execution
 
-Example: 
+Example:
 
 ```bash
 python src/cli/run_many_configs.py config/runs.yaml
@@ -111,7 +111,7 @@ runs:
 
 This allows multiple sessions or races to be processed in sequence.
 
-Output layout: 
+Output layout:
 
 A typical output folder looks like:
 
@@ -171,7 +171,7 @@ Output meanings:
         - comparison reports
         - comparison CSVs
 
-Validation and analysis: 
+Validation and analysis:
 
     - The pipeline also supports follow-up validation workflows, such as:
         - ranked summary comparison
@@ -179,6 +179,7 @@ Validation and analysis:
         - future notebook or script-based cross-run analysis
 
 Recommended usage flow:
+
     - Start with a batch comparison
     - Inspect batch_summary_ranked.csv
     - Open index.html

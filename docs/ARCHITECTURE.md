@@ -62,31 +62,28 @@ Examples:
     - physics.py
     
 This layer should remain computation-focused and avoid visualization concerns.
-
-src/reports/ - Responsible for creating artifacts and reports.
-
-Examples:
-    - delta plots
-    - comparison table CSV exports
-    - HTML comparison reports
-    - HTML batch index pages
-
-Examples:
-    - plot_delta_time.py
-    - export_comparison_table.py
-    - html_report.py
-    - html_index.py
+    - src/reports/ 
+        - Responsible for creating artifacts and reports.
+        Examples:
+            - delta plots
+            - comparison table CSV exports
+            - HTML comparison reports
+            - HTML batch index pages
+        Examples:
+            - plot_delta_time.py
+            - export_comparison_table.py
+            - html_report.py
+            - html_index.py
 
 This layer consumes computed outputs and turns them into user-facing artifacts.
+    - src/cli/
+        - Responsible for orchestration.
 
-src/cli/
-    - Responsible for orchestration.
-
-Execution modes include:
-    - run_pipeline.py: single comparison entrypoint
-    - batch_compare.py: multiple pairwise comparisons
-    - run_from_config.py: config-driven single run
-    - run_many_configs.py: batch pipeline over multiple configs
+        Execution modes include:
+            - run_pipeline.py: single comparison entrypoint
+            - batch_compare.py: multiple pairwise comparisons
+            - run_from_config.py: config-driven single run
+            - run_many_configs.py: batch pipeline over multiple configs
 
 This layer is the control surface of the system.
     - dashboard.py
@@ -94,21 +91,17 @@ This layer is the control surface of the system.
       - It is intentionally separate from the core pipeline so that:
         - report generation stays deterministic
         - dashboard remains read-only
-    - UI concerns do not leak into analysis code
+      - UI concerns do not leak into analysis code
 
 ## Execution modes:
-
-Single comparison
-    - Used for focused lap analysis between two drivers.
-
-Batch comparison
-    - Used for all-vs-all style comparisons over a selected driver set.
-
-Config-driven execution
-    - Used for reproducible runs with predefined settings.
-
-Multi-config execution
-    - Used for running multiple race/session configs in sequence.
+    - Single comparison
+        - Used for focused lap analysis between two drivers.
+    - Batch comparison
+        - Used for all-vs-all style comparisons over a selected driver set.
+    - Config-driven execution
+        - Used for reproducible runs with predefined settings.
+    - Multi-config execution
+        - Used for running multiple race/session configs in sequence.
 
 ## Output structure
 
@@ -152,10 +145,10 @@ reports/2023_Italy_Q/
 
 ## Future extensions
 
-Potential next steps include:
-    - sector-level or corner-level attribution exports
-    - richer vehicle dynamics modeling
-    - multi-session benchmarking
-    - experiment runners for parameter sweeps
-    - full dashboard navigation across reports and plots
-    - publishable demo deployment
+    - Potential next steps include:
+        - sector-level or corner-level attribution exports
+        - richer vehicle dynamics modeling
+        - multi-session benchmarking
+        - experiment runners for parameter sweeps
+        - full dashboard navigation across reports and plots
+        - publishable demo deployment
