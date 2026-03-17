@@ -119,6 +119,14 @@ pytest -q
 python src/cli/run_pipeline.py --year 2023 --gp Italy --session Q --ref VER --tgt LEC --out-tag monza_2023q_ver_vs_lec
 ```
 
+## Config-driven runs
+
+You can execute a full batch run from YAML:
+
+```bash
+python src/cli/run_from_config.py config/run_italy_q.yaml
+```
+
 ## Steps
 - Create virtual environment
 - Install dependencies
