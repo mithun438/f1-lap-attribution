@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pandas as pd
+from src.analysis.corner_detection import detect_segments
 
 
 def summarize_segments(
@@ -25,7 +26,7 @@ def summarize_segments(
 
     df = df.copy()
 
-    df["segment_id"] = (df["distance_m"] // segment_length_m).astype(int)
+    df = detect_segments(df)
 
     rows = []
 
