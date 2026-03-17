@@ -1,0 +1,4 @@
+ref,tgt,ref_lap_time_s,tgt_lap_time_s,delta_lap_time_s,fuel_corrected_delta_s,fuel_penalty_delta_s,year,gp,session,out_tag,final_delta_s,applied_correction_s,comparison_table_csv,html_report,abs_delta_lap_time_s
+LEC,SAI,80.361,80.294,-0.15113813423849687,,,2023,Italy,Q,batch_LEC_vs_SAI,-0.15113813423849687,,reports\2023_Italy_Q\batch_LEC_vs_SAI_comparison_table.csv,reports\2023_Italy_Q\batch_LEC_vs_SAI_report.html,0.15113813423849687
+VER,LEC,80.307,80.361,0.13223335610502185,,,2023,Italy,Q,batch_VER_vs_LEC,0.13223335610502185,,reports\2023_Italy_Q\batch_VER_vs_LEC_comparison_table.csv,reports\2023_Italy_Q\batch_VER_vs_LEC_report.html,0.13223335610502185
+VER,SAI,80.307,80.294,-0.016031223324938025,,,2023,Italy,Q,batch_VER_vs_SAI,-0.016031223324938025,,reports\2023_Italy_Q\batch_VER_vs_SAI_comparison_table.csv,reports\2023_Italy_Q\batch_VER_vs_SAI_report.html,0.016031223324938025

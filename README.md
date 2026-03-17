@@ -119,6 +119,22 @@ pytest -q
 python src/cli/run_pipeline.py --year 2023 --gp Italy --session Q --ref VER --tgt LEC --out-tag monza_2023q_ver_vs_lec
 ```
 
+## Config-driven runs
+
+You can execute a full batch run from YAML:
+
+```bash
+python src/cli/run_from_config.py config/run_italy_q.yaml
+```
+
+## Multi-run pipeline
+
+Run multiple configs:
+
+```bash
+python src/cli/run_many_configs.py config/runs.yaml
+```
+
 ## Steps
 - Create virtual environment
 - Install dependencies
@@ -165,15 +181,34 @@ python src/cli/run_pipeline.py --year 2023 --gp Italy --session Q --ref VER --tg
     - heuristic phase boundaries
     - interpolation effects on absolute lap delta
 
-## Future extensions
-- Full-lap accounting
-- Curvature-based corner detection
-- Longitudinal acceleration braking detection
-- Improved throttle-on detection
-- Multi-lap statistics
-- Cross-driver and cross-track analysis
+## Dashboard
+
+A lightweight Streamlit viewer is included for browsing generated runs:
+``` bash
+    streamlit run dashboard.py
+```
+
+## Experiment mode
+
+Run parameter sweeps across multiple pipeline settings:
+
+```bash
+python src/cli/run_experiments.py config/experiments_italy_q.yaml
+```
+This generates experiment-specific output folders and a summary table:
+    reports/experiments/experiment_summary.csv
+
+To run it: 
+
+```bash
+pytest -q
+python src/cli/run_experiments.py config/experiments_italy_q.yaml
+```
+
+Expected outputs:
+    - multiple experiment folders under reports/experiments/...
+    - reports/experiments/experiment_summary.csv
 
 ## Disclaimer
 - This project uses public telemetry and simplified heuristics.
 - It is intended as a technical demonstration, not a substitute for internal F1 tools or proprietary data.
-
