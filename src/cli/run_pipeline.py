@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
+from src.analysis.segment_summary import summarize_segments
 from src.config import load_pipeline_config
 from src.data.fastf1_utils import pull_fastest_lap_pair
 from src.reports.export_comparison_table import export_comparison_table
@@ -156,6 +157,22 @@ def run_one(
         distance_step_m=distance_step_m,
     )
 
+    segment_summary_path = None
+
+    try:
+        comp_df = pd.read_csv(comparison_table_path)
+
+        seg_df = summarize_segments(comp_df)
+
+        segment_summary_path = out_dir / f"{out_tag}_segment_summary.csv"
+
+        seg_df.to_csv(segment_summary_path, index=False)
+
+        print(f"Wrote: {segment_summary_path}")
+
+    except Exception as e:
+        print(f"Segment summary skipped: {e}")
+
     comparison_df = pd.read_csv(comparison_table_path)
     straight_time_loss_s = estimate_straight_time_loss(comparison_df)
 
@@ -195,6 +212,7 @@ def run_one(
         "comparison_table_csv": str(comparison_table_path),
         "html_report": str(report_path),
         "straight_time_loss_s": straight_time_loss_s,
+        "segment_summary_csv": str(segment_summary_path) if segment_summary_path else None,
     }
 
 
