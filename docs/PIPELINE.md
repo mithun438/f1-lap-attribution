@@ -115,6 +115,7 @@ Output layout:
 
 A typical output folder looks like:
 
+```bash
 reports/2023_Italy_Q/
 ├── batch_summary.csv
 ├── batch_summary_ranked.csv
@@ -124,6 +125,7 @@ reports/2023_Italy_Q/
 ├── batch_VER_vs_LEC_delta_time_vs_distance.png
 ├── batch_VER_vs_LEC_delta_time_vs_distance_fuel_corrected.png
 └── _cache/
+```
 
 Output meanings:
     - batch_summary.csv: Structured summary of all pairwise comparisons.

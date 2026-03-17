@@ -114,6 +114,7 @@ Multi-config execution
 
 A typical batch run produces: 
 
+```bash
 reports/2023_Italy_Q/
 ├── batch_summary.csv
 ├── batch_summary_ranked.csv
@@ -122,6 +123,7 @@ reports/2023_Italy_Q/
 ├── batch_VER_vs_LEC_comparison_table.csv
 ├── batch_VER_vs_LEC_delta_time_vs_distance.png
 └── _cache/
+```
 
 ## Design principles
 1. Reproducibility
