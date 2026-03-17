@@ -188,6 +188,27 @@ A lightweight Streamlit viewer is included for browsing generated runs:
     streamlit run dashboard.py
 ```
 
+## Experiment mode
+
+Run parameter sweeps across multiple pipeline settings:
+
+```bash
+python src/cli/run_experiments.py config/experiments_italy_q.yaml
+```
+This generates experiment-specific output folders and a summary table:
+    reports/experiments/experiment_summary.csv
+
+To run it: 
+
+```bash
+pytest -q
+python src/cli/run_experiments.py config/experiments_italy_q.yaml
+```
+
+Expected outputs:
+    - multiple experiment folders under reports/experiments/...
+    - reports/experiments/experiment_summary.csv
+
 ## Disclaimer
 - This project uses public telemetry and simplified heuristics.
 - It is intended as a technical demonstration, not a substitute for internal F1 tools or proprietary data.
