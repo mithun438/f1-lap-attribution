@@ -9,6 +9,7 @@ from src.data.fastf1_utils import pull_fastest_lap_pair
 from src.reports.export_comparison_table import export_comparison_table
 from src.reports.html_report import write_html_report
 from src.reports.plot_delta_time import run_delta_plot
+from src.telemetry.physics import estimate_straight_time_loss
 
 
 def parse_args() -> argparse.Namespace:
@@ -155,6 +156,9 @@ def run_one(
         distance_step_m=distance_step_m,
     )
 
+    comparison_df = pd.read_csv(comparison_table_path)
+    straight_time_loss_s = estimate_straight_time_loss(comparison_df)
+
     fuel_corrected_delta_s = (
         float(final_delta_s + applied_correction_s) if applied_correction_s is not None else None
     )
@@ -190,6 +194,7 @@ def run_one(
         ),
         "comparison_table_csv": str(comparison_table_path),
         "html_report": str(report_path),
+        "straight_time_loss_s": straight_time_loss_s,
     }
 
 

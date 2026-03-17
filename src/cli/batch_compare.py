@@ -107,6 +107,7 @@ def main() -> None:
         "ref_lap_time_s",
         "tgt_lap_time_s",
         "delta_lap_time_s",
+        "straight_time_loss_s",
         "fuel_corrected_delta_s",
         "fuel_penalty_delta_s",
         "year",
