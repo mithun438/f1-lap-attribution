@@ -127,6 +127,14 @@ You can execute a full batch run from YAML:
 python src/cli/run_from_config.py config/run_italy_q.yaml
 ```
 
+## Multi-run pipeline
+
+Run multiple configs:
+
+```bash
+python src/cli/run_many_configs.py config/runs.yaml
+```
+
 ## Steps
 - Create virtual environment
 - Install dependencies

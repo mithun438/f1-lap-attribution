@@ -1,0 +1,3 @@
+runs:
+  - config/run_italy_q.yaml
+  - config/run_italy_q.yaml
